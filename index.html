@@ -2,86 +2,92 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <title>초등 3학년 수학 탐험대</title>
+    <title>6학년 수학 마스터: 몬스터 레이드</title>
     <style>
-        body { font-family: 'Arial', sans-serif; text-align: center; background-color: #f0f8ff; padding: 20px; }
-        #game-container { background: white; border-radius: 20px; padding: 30px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); display: inline-block; min-width: 350px; }
-        h1 { color: #ff6b6b; }
-        .problem { font-size: 40px; margin: 20px; color: #333; }
-        input { font-size: 24px; width: 80px; text-align: center; border: 3px solid #4ecdc4; border-radius: 10px; padding: 5px; }
-        button { font-size: 20px; background: #ff9f43; color: white; border: none; border-radius: 10px; padding: 10px 20px; cursor: pointer; transition: 0.3s; }
-        button:hover { background: #ee5253; }
-        #message { margin-top: 20px; font-size: 20px; font-weight: bold; height: 30px; }
-        .score { font-size: 18px; color: #555; margin-bottom: 10px; }
-        .monster { font-size: 60px; margin: 10px; transition: transform 0.2s; }
+        body { font-family: 'Malgun Gothic', sans-serif; background-color: #2c3e50; color: white; text-align: center; padding: 20px; }
+        #game-container { background: #34495e; border: 4px solid #f1c40f; border-radius: 20px; padding: 20px; display: inline-block; width: 90%; max-width: 500px; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+        .stat-bar { background: #eee; height: 20px; border-radius: 10px; margin: 10px 0; overflow: hidden; }
+        #hp-fill { background: #e74c3c; width: 100%; height: 100%; transition: 0.5s; }
+        #monster-img { font-size: 80px; margin: 20px; }
+        .problem-box { background: white; color: #2c3e50; padding: 20px; border-radius: 10px; font-size: 24px; font-weight: bold; margin-bottom: 15px; }
+        input { font-size: 20px; width: 120px; padding: 10px; border-radius: 5px; border: none; text-align: center; }
+        button { font-size: 20px; background: #f1c40f; color: #2c3e50; border: none; padding: 10px 20px; border-radius: 5px; cursor: pointer; font-weight: bold; margin-left: 10px; }
+        button:hover { background: #d4ac0d; }
+        #log { margin-top: 15px; font-size: 16px; color: #ecf0f1; min-height: 20px; }
     </style>
 </head>
 <body>
 
 <div id="game-container">
-    <h1>👾 수학 몬스터 퇴치!</h1>
-    <div class="score">잡은 몬스터: <span id="score">0</span>마리</div>
-    <div id="monster-img" class="monster">👻</div>
-    <div class="problem" id="question">준비 시작!</div>
-    <input type="number" id="answer" placeholder="?" onkeyup="if(window.event.keyCode==13){checkAnswer()}">
-    <br><br>
-    <button onclick="checkAnswer()">정답 확인!</button>
-    <div id="message"></div>
+    <h2>LV.6 수학 기사단</h2>
+    <div id="monster-img">🐉</div>
+    <div style="text-align: left; font-size: 14px;">몬스터 HP</div>
+    <div class="stat-bar"><div id="hp-fill"></div></div>
+    
+    <div class="problem-box" id="question">문제를 불러오는 중...</div>
+    
+    <input type="text" id="answer" placeholder="정답 입력" onkeyup="if(window.event.keyCode==13){attack()}">
+    <button onclick="attack()">공격!</button>
+    
+    <div id="log">몬스터가 나타났습니다! 수학으로 공격하세요!</div>
 </div>
 
 <script>
-    let currentAns = 0;
-    let score = 0;
-    const monsters = ['👻', '👹', '👾', '👽', '🤖', '🐲'];
+    let hp = 100;
+    let currentAnswer = 0;
+    const monsters = ['🐉', '👹', '🔱', '🛸', '🐘'];
 
-    function makeProblem() {
-        // 3학년 수준의 곱셈과 나눗셈 섞기
-        const type = Math.random() > 0.5 ? 'mul' : 'div';
+    function makeQuestion() {
+        const type = Math.floor(Math.random() * 3);
         let qText = "";
-        
-        if (type === 'mul') {
-            let n1 = Math.floor(Math.random() * 9) + 2; // 2~9단
-            let n2 = Math.floor(Math.random() * 9) + 1;
-            currentAns = n1 * n2;
-            qText = `${n1} × ${n2} = `;
-        } else {
-            let n2 = Math.floor(Math.random() * 8) + 2; // 나누는 수
-            let ans = Math.floor(Math.random() * 9) + 1; // 몫
-            let n1 = n2 * ans; // 나누어지는 수
-            currentAns = ans;
-            qText = `${n1} ÷ ${n2} = `;
+
+        if (type === 0) { // 소수의 곱셈/나눗셈
+            let n1 = (Math.random() * 5 + 1).toFixed(1);
+            let n2 = Math.floor(Math.random() * 9) + 2;
+            currentAnswer = (parseFloat(n1) * n2).toFixed(1);
+            qText = `${n1} × ${n2} = ?`;
+        } else if (type === 1) { // 비와 비율 (백분율)
+            let total = 100;
+            let part = Math.floor(Math.random() * 90) + 5;
+            currentAnswer = part;
+            qText = `${part} / ${total} 을 백분율(%)로?`;
+        } else { // 분수의 나눗셈 (간단한 형태)
+            let bottom = Math.floor(Math.random() * 5) + 2;
+            let top = Math.floor(Math.random() * 8) + 2;
+            currentAnswer = top;
+            qText = `(${top}/${bottom}) ÷ (1/${bottom}) = ?`;
         }
-        
+
         document.getElementById('question').innerText = qText;
         document.getElementById('answer').value = "";
         document.getElementById('answer').focus();
     }
 
-    function checkAnswer() {
+    function attack() {
         const userAns = document.getElementById('answer').value;
-        const msg = document.getElementById('message');
-        const monster = document.getElementById('monster-img');
+        const log = document.getElementById('log');
+        const hpFill = document.getElementById('hp-fill');
 
-        if (parseInt(userAns) === currentAns) {
-            score++;
-            msg.innerText = "정답이야! 몬스터를 잡았어! ✨";
-            msg.style.color = "#2ecc71";
-            document.getElementById('score').innerText = score;
-            
-            // 몬스터 랜덤 교체 및 애니메이션
-            monster.innerText = monsters[Math.floor(Math.random() * monsters.length)];
-            monster.style.transform = "scale(1.2)";
-            setTimeout(() => { monster.style.transform = "scale(1)"; }, 200);
-            
-            makeProblem();
+        if (userAns == currentAnswer) {
+            hp -= 25;
+            log.innerText = "💥 크리티컬 히트! (정답: " + currentAnswer + ")";
+            log.style.color = "#2ecc71";
+            hpFill.style.width = hp + "%";
+
+            if (hp <= 0) {
+                log.innerText = "🏆 승리! 다음 몬스터가 나타납니다!";
+                hp = 100;
+                hpFill.style.width = "100%";
+                document.getElementById('monster-img').innerText = monsters[Math.floor(Math.random() * monsters.length)];
+            }
+            makeQuestion();
         } else {
-            msg.innerText = "다시 한번 생각해봐! 🧐";
-            msg.style.color = "#e74c3c";
+            log.innerText = "🛡️ 공격 실패! 다시 계산해 보세요.";
+            log.style.color = "#e74c3c";
         }
     }
 
-    // 게임 시작
-    makeProblem();
+    makeQuestion();
 </script>
 
 </body>
